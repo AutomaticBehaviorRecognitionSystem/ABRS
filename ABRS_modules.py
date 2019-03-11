@@ -1,3 +1,9 @@
+
+# Copyright (c) 2019 Primoz Ravbar UCSB
+# Licensed under BSD 2-Clause [see LICENSE for details]
+# Written by Primoz Ravbar
+
+
 import numpy as np
 import scipy
 from scipy import ndimage
@@ -39,7 +45,6 @@ def center_of_gravity(cfrVectRec):
 
     sh = np.shape(cfrVectRec);
 
-
     F=np.absolute(np.fft.fft(cfrVectRec,axis=0))
 
     
@@ -54,8 +59,74 @@ def center_of_gravity(cfrVectRec):
 
     cG = sFA/sF
 
+
     return cG
 
+def center_of_gravity2(cfrVectRec):
+
+
+    F=np.absolute(np.fft.fft(cfrVectRec,axis=0))
+
+    sumF = np.sum(F,axis=0);
+    Fnorm = F/sumF;
+    F=Fnorm;
+    
+    shF = np.shape(F);
+    halfFreq = int(np.ceil(shF[0]/2));
+
+    F1 = F[0:halfFreq,:];
+
+    
+    shF1 = np.shape(F1);
+    
+    av = np.zeros((1,shF1[0]));
+    av[0,:] = np.arange(1,shF1[0]+1);
+    A = np.repeat(av,shF1[1],axis=0);
+
+    FA = F1*np.transpose(A);
+
+    sF = np.sum(F1,axis=0);
+    sFA = np.sum(FA,axis=0);
+
+    cG = sFA/sF
+
+
+    return cG, F1
+
+def center_of_gravity3(cfrVectRec):
+
+    shX = np.shape(cfrVectRec);
+
+    zeroPdd = 9;
+
+    Xz=np.vstack((np.zeros((zeroPdd,shX[1])),cfrVectRec));
+    Xz2 = np.vstack((Xz,np.zeros((zeroPdd,shX[1]))));
+
+    F=np.absolute(np.fft.fft(Xz2,axis=0));
+
+    shF = np.shape(F);
+    halfFreq = int(np.ceil(shF[0]/2));
+    hiCutOff = 0;
+
+    F1 = F[0:halfFreq-hiCutOff,:];
+    shF1 = np.shape(F1);
+
+    sumF1 = np.sum(F1,axis=0);
+    Fnorm = F1/sumF1;
+    F1=Fnorm;
+    
+    av = np.zeros((1,shF1[0]));
+    av[0,:] = np.arange(1,shF1[0]+1);
+    A = np.repeat(av,shF1[1],axis=0);
+
+    FA = F1*np.transpose(A);
+
+    sF = np.sum(F1,axis=0);
+    sFA = np.sum(FA,axis=0);
+
+    cG = sFA/sF   
+
+    return cG, F1
     
 
 def subtract_average(frameVectRec,dim):
@@ -83,14 +154,13 @@ def subtract_average(frameVectRec,dim):
 
 def read_frames(startFrame, endFrame, file_name, newSize):
 
-    #cap = cv2.VideoCapture('CantonS_Dusted_JZ_1  0.avi')
     
     cap = cv2.VideoCapture(file_name)
 
     print(file_name)
 
     for i in range(startFrame, endFrame):
-        #start = time.time()
+      
         cap.set(1,i);
         ret, frame = cap.read() #get frame
        
@@ -162,12 +232,9 @@ def getting_frame_record(frRec, startWin, endWin, fb):
     maxMovement = np.max(frameDiffComm);
 
     posDic = {"xPos" : colMaxDiff, "yPos" : rowMaxDiff};
-    
-    
+        
 
     for i in range(0,(endWin-startWin)):
-
-           #print(endWin-startWin)
         
            rs = frameVectFloatRec[i,:].reshape(200,200);
            
@@ -185,7 +252,6 @@ def getting_frame_record(frRec, startWin, endWin, fb):
                rightEdge=0;
 
            cfr = rs[topEdge:bottomEdge,leftEdge:rightEdge];
-
            shapeCfr = cfr.shape; 
             
            if shapeCfr[1] < 80:
@@ -198,8 +264,7 @@ def getting_frame_record(frRec, startWin, endWin, fb):
                shapeCfr = cfr.shape;
     
 
-           cfrVect = cfr.reshape(1,80*80);
-
+           cfrVect = cfr.reshape(1,80*80)
 
            if i == 0:
                cfrVectRec = cfrVect;
@@ -264,7 +329,6 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
     colMaxDiff = int(colMaxDiff);
 
 
-
     posDic = {"xPos" : int(colMaxDiff*ratioDev), "yPos" : int(rowMaxDiff*ratioDev)};
 
     
@@ -287,7 +351,6 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
 
             rowPos = posDic["yPos"]; colPos = posDic["xPos"];    
 
-            #plt.matshow(rawFBF, interpolation=None, aspect='auto');plt.show()
             topEdge = rowPos-40;
             if topEdge < 0:
                 topEdge=0;
@@ -322,7 +385,6 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
             if i > 0:
                 zoomInFrameVectRec = np.vstack((zoomInFrameVectRec,zoomInFrameVect));
                        
-            #plt.matshow(np.reshape(zoomInFrameVect,(80,80)), interpolation=None, aspect='auto');plt.show()
 
     return posDic, zoomInFrameVectRec
 
@@ -367,7 +429,6 @@ def etho2ethoAP (idx):
 def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
 
-
     fileList = sorted(os.listdir(dirPathFeatures));
 
     for fl in range(0, numbFiles, 1):
@@ -379,7 +440,7 @@ def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
         with open(featureMatDirPathFileName, "rb") as f:
              STF_30_posXY_dict = pickle.load(f);
-             #featureMatCurrent = pickle.load(f)
+
         featureMatCurrent = STF_30_posXY_dict["featureMat"];
         posMatCurrent = STF_30_posXY_dict["posMat"];
         maxMovementMatCurrent = STF_30_posXY_dict["maxMovementMat"];
@@ -411,7 +472,6 @@ def removeZeroLabelsFromTrainingData (label,data):
 
     for i in range(0,shData[1]):
 
-        #if label[0,i] != 0 and label[0,i] != 7:
         if label[0,i] != 0:    
 
             newLabel[0,ind] = label[0,i]; 
@@ -436,7 +496,6 @@ def computeSpeedFromPosXY (posMat,halfWindow):
 
     return speedMat
 
-#def postprocess_ethograms (ethoRaw):
                                                                                 
 
 def subplot_images (sMRecTh,rows,columns):
@@ -449,6 +508,5 @@ def subplot_images (sMRecTh,rows,columns):
         fig.add_subplot(rows, columns, i)
         plt.imshow(img)
     plt.show()
-
 
     
