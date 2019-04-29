@@ -1,1 +1,3 @@
 # ABRS
+
+Automatic Behavior Recognition System can annotate behaviors of freely moving flies from video. It extracts spatio-temporal features from video. These spatio-temporal features can then be used in supervised machine learning (ML) to classify behaviors. The extraction of the features is implemented in two steps: first, run video_to_ST_image_batch to produce "ST-images" (ST-images capture "shapes of movements" in a defined time-window), second, run ST_image_to_ST_feature_batch to reduce the dimensionality of the ST-images (to 30 spatio-temporal features - down from 80x80 = 6400 dimensions).
