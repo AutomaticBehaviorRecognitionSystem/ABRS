@@ -1,10 +1,3 @@
-
-# Copyright (c) 2019 Primoz Ravbar UCSB
-# Licensed under BSD 2-Clause [see LICENSE for details]
-# Written by Primoz Ravbar
-# Last update: 05/07/2019
-
-
 import numpy as np
 import scipy
 from scipy import ndimage
@@ -33,12 +26,20 @@ def create_ST_image(cfrVectRec):
     MST = dM1M2*0;
     MST[dM1M2<0] = dM1M2[dM1M2<0];
     
+    #dM1M2*(-1);
+    #dM1M2[dM1M2<0] = 0;
 
     sM = np.sum(np.absolute(MST), axis=0);
     
+    #sM = np.sum(dM1M2, axis=0);
 
     I = np.reshape(sM,(80,80));
 
+    #plt.matshow(dM, interpolation=None, aspect='auto');plt.show()
+
+    #F = np.fft.fft(cfrVectRec, n=2*2*2*2*2*2, axis=0, norm=None);
+    #for c in range(0,cfrVectRec.shape[1]):
+     #   centGrav = ndimage.measurements.center_of_mass(np.absolute(F[:,c]));
 	 
     return I, sM, MST;
 
@@ -46,8 +47,12 @@ def center_of_gravity(cfrVectRec):
 
     sh = np.shape(cfrVectRec);
 
+    #h = np.hanning(16)
     F=np.absolute(np.fft.fft(cfrVectRec,axis=0))
 
+    #sumF = np.sum(F,axis=0);
+    #Fnorm = F/sumF;
+    #F=Fnorm;
     
     av = np.zeros((1,sh[0]));
     av[0,:] = np.arange(1,sh[0]+1);
@@ -60,12 +65,15 @@ def center_of_gravity(cfrVectRec):
 
     cG = sFA/sF
 
+    #print (np.min(cG))
 
     return cG
 
 def center_of_gravity2(cfrVectRec):
 
+    #sh = np.shape(cfrVectRec);
 
+    #h = np.hanning(16)
     F=np.absolute(np.fft.fft(cfrVectRec,axis=0))
 
     sumF = np.sum(F,axis=0);
@@ -77,6 +85,7 @@ def center_of_gravity2(cfrVectRec):
 
     F1 = F[0:halfFreq,:];
 
+   # F1=F1[1:15,:]
     
     shF1 = np.shape(F1);
     
@@ -91,6 +100,7 @@ def center_of_gravity2(cfrVectRec):
 
     cG = sFA/sF
 
+    #print (np.min(cG))
 
     return cG, F1
 
@@ -104,6 +114,7 @@ def center_of_gravity3(cfrVectRec):
     Xz2 = np.vstack((Xz,np.zeros((zeroPdd,shX[1]))));
 
     F=np.absolute(np.fft.fft(Xz2,axis=0));
+    #F = subtract_average(F,1);
 
     shF = np.shape(F);
     halfFreq = int(np.ceil(shF[0]/2));
@@ -128,6 +139,66 @@ def center_of_gravity3(cfrVectRec):
     cG = sFA/sF   
 
     return cG, F1
+
+def create_3C_image (cfrVectRec):
+
+
+    cG=center_of_gravity(cfrVectRec);
+
+    averageSubtFrameVecRec = subtract_average(cfrVectRec,0)
+
+    imRaw = np.reshape(cfrVectRec[1,:],(80,80))
+
+    #imDiff = np.reshape(averageSubtFrameVecRec[1,:]-averageSubtFrameVecRec[0,:],(80,80))
+    imDiff = np.reshape(cfrVectRec[1,:]-cfrVectRec[0,:],(80,80));
+    imDiffAbs = np.absolute(imDiff)
+    maxImDiffAbs = np.max(np.max(imDiffAbs))
+    imDiffCl = np.zeros((80,80))
+    imDiffCl[imDiffAbs > maxImDiffAbs/10] = imDiff[imDiffAbs > maxImDiffAbs/10]
+    imDiffClNorm = imDiffCl/maxImDiffAbs
+                                
+    totVar = np.sum(np.absolute(averageSubtFrameVecRec),axis=0)
+    imVar = np.reshape(totVar,(80,80))
+    imVarNorm = imVar/np.max(np.max(imVar))
+    imVarBin = np.zeros((80,80))
+    imVarBin[imVarNorm > 0.10] = 1; #######!!!!!!!!!!
+                                
+    I = np.reshape(cG,(80,80))*imVarBin;
+    I = np.nan_to_num(I);
+                                
+    imSTsm = smooth_2d (I, 3)
+    sM = imSTsm.reshape((80*80))
+    sM = np.nan_to_num(sM)
+
+    if np.max(sM) > 0:
+        sMNorm = sM/np.max(sM)
+    else:
+        sMNorm = sM
+
+    I_RS = np.reshape(sMNorm,(80,80))
+
+    imDiffAbs = np.absolute(imDiffClNorm)
+
+    imDiffClNeg = np.zeros((80,80))
+    imDiffClPos = np.zeros((80,80))
+    imDiffClNeg[imDiffClNorm<0] = np.absolute(imDiffClNorm[imDiffClNorm<0])
+    imDiffClPos[imDiffClNorm>0] = imDiffClNorm[imDiffClNorm>0]
+
+    imDiffClNormNeg = imDiffClNeg/np.max(np.max(imDiffClNeg))
+    imDiffClNormPos = imDiffClPos/np.max(np.max(imDiffClPos))
+    
+
+    rgbArray = np.zeros((80,80,3), 'uint8')
+    rgbArray[..., 0] = I_RS*255
+    #rgbArray[..., 1] = np.reshape(np.absolute(averageSubtFrameVecRec[1,:]),(80,80))*256
+    rgbArray[..., 1] = imDiffAbs*255
+    #rgbArray[..., 1] = imDiffClNormNeg*256
+    #rgbArray[..., 2] = imDiffClNormPos*256
+    rgbArray[..., 2] = imRaw*255
+
+    im3C = rgbArray
+
+    return im3C 
     
 
 def subtract_average(frameVectRec,dim):
@@ -155,15 +226,21 @@ def subtract_average(frameVectRec,dim):
 
 def read_frames(startFrame, endFrame, file_name, newSize):
 
+    #cap = cv2.VideoCapture('CantonS_Dusted_JZ_1  0.avi')
+
+    
     
     cap = cv2.VideoCapture(file_name)
 
     print(file_name)
 
     for i in range(startFrame, endFrame):
-      
+        #start = time.time()
         cap.set(1,i);
         ret, frame = cap.read() #get frame
+        #end = time.time()
+
+        #print(i)
        
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #convert frame to gray
         
@@ -185,9 +262,51 @@ def read_frames(startFrame, endFrame, file_name, newSize):
     return frRec;
 
 
-def getting_frame_record(frRec, startWin, endWin, fb):
+def read_frames2(startFrame, endFrame, file_name, newSize):
 
     
+    frRec = np.zeros((endFrame,newSize[0]*newSize[1]))
+    
+    
+    cap = cv2.VideoCapture(file_name)
+
+    print(file_name)
+
+    for i in range(startFrame, endFrame):
+        #start = time.time()
+        cap.set(1,i);
+        ret, frame = cap.read() #get frame
+        #end = time.time()
+
+        #print(i)
+       
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #convert frame to gray
+        
+        rs = cv2.resize(gray,(newSize[0],newSize[1]))
+        frameVect = rs.reshape(1,newSize[0]*newSize[1])
+        frameVectFloat = frameVect.astype(float)
+
+        frRec[i,:] = frameVectFloat
+
+        '''
+        if i == startFrame:
+            frRec = frameVectFloat;
+        if i > startFrame:
+            frRec = np.vstack((frRec,frameVectFloat));
+        '''    
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()    
+        
+    return frRec;
+
+
+def getting_frame_record(frRec, startWin, endWin, fb):
+
+    #frameVectFloatRec = np.zeros((endWin,200*200))
             
     for i in range(startWin,endWin):
 
@@ -209,8 +328,10 @@ def getting_frame_record(frRec, startWin, endWin, fb):
             rs = rf   
             
             frameVect = rs.reshape(1,200*200);
-            frameVectFloat = frameVect.astype(float);
+            frameVectFloat = frameVect.astype(float)
 
+            #frameVectFloatRec[i,:] = frameVectFloat
+ 
             if i == startWin:
                previousFrame = frameVectFloat;
                frameDiffComm = previousFrame*0;
@@ -233,10 +354,11 @@ def getting_frame_record(frRec, startWin, endWin, fb):
     maxMovement = np.max(frameDiffComm);
 
     posDic = {"xPos" : colMaxDiff, "yPos" : rowMaxDiff};
-        
+    
+    
+    #plt.imshow(frameDiffComm.reshape(200,200));plt.show()
 
     for i in range(0,(endWin-startWin)):
-        
         
            rs = frameVectFloatRec[i,:].reshape(200,200)
 
@@ -277,10 +399,12 @@ def getting_frame_record(frRec, startWin, endWin, fb):
            if rightOvershot > 0:
                col = np.zeros((shapeCfr[0], np.absolute(shapeCfr[1]-80)))
                cfr = np.hstack((cfr,col))
-               shapeCfr = cfr.shape;   
+               shapeCfr = cfr.shape;
+
     
 
-           cfrVect = cfr.reshape(1,80*80)
+           cfrVect = cfr.reshape(1,80*80);
+
 
            if i == 0:
                cfrVectRec = cfrVect;
@@ -321,6 +445,7 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
 
             rs = rf
 
+            #plt.matshow(rs, interpolation=None, aspect='auto');plt.show()
             
             frameVect = rs.reshape(1,int(newSize[0]/2)*int(newSize[1]/2));
             frameVectFloat = frameVect.astype(float);
@@ -341,9 +466,12 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
     rowMaxDiff = np.floor(indMaxDiff/int(newSize[0]/2));
     colMaxDiff = indMaxDiff - (rowMaxDiff*int(newSize[0]/2));
 
+    #rowMaxDiff = rowMaxDiff.astype(int);
+    #colMaxDiff = colMaxDiff.astype(int);
     rowMaxDiff = int(rowMaxDiff);
     colMaxDiff = int(colMaxDiff);
 
+    #maxMovement = np.max(frameDiffComm);
 
     posDic = {"xPos" : int(colMaxDiff*ratioDev), "yPos" : int(rowMaxDiff*ratioDev)};
 
@@ -367,6 +495,7 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
 
             rowPos = posDic["yPos"]; colPos = posDic["xPos"];    
 
+            #plt.matshow(rawFBF, interpolation=None, aspect='auto');plt.show()
             topEdge = rowPos-40;
             if topEdge < 0:
                 topEdge=0;
@@ -401,6 +530,7 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
             if i > 0:
                 zoomInFrameVectRec = np.vstack((zoomInFrameVectRec,zoomInFrameVect));
                        
+            #plt.matshow(np.reshape(zoomInFrameVect,(80,80)), interpolation=None, aspect='auto');plt.show()
 
     return posDic, zoomInFrameVectRec
 
@@ -444,6 +574,8 @@ def etho2ethoAP (idx):
 
 def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
+    #dirPathFeatures = 'Z:\Durafshan\STfeatures_training_chrim_30Hz';
+    #numbFiles = 11;
 
     fileList = sorted(os.listdir(dirPathFeatures));
 
@@ -456,7 +588,7 @@ def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
         with open(featureMatDirPathFileName, "rb") as f:
              STF_30_posXY_dict = pickle.load(f);
-
+             #featureMatCurrent = pickle.load(f)
         featureMatCurrent = STF_30_posXY_dict["featureMat"];
         posMatCurrent = STF_30_posXY_dict["posMat"];
         maxMovementMatCurrent = STF_30_posXY_dict["maxMovementMat"];
@@ -477,6 +609,8 @@ def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
 def removeZeroLabelsFromTrainingData (label,data):
 
+    #label = idxLabelAP;
+    #data = featureMat;
 
     shData = np.shape(data);
     shLabel = np.shape(label);
@@ -488,6 +622,7 @@ def removeZeroLabelsFromTrainingData (label,data):
 
     for i in range(0,shData[1]):
 
+        #if label[0,i] != 0 and label[0,i] != 7:
         if label[0,i] != 0:    
 
             newLabel[0,ind] = label[0,i]; 
@@ -497,6 +632,7 @@ def removeZeroLabelsFromTrainingData (label,data):
 
     return newLabel,newData
 
+#def normalize_image (im):
 
 def computeSpeedFromPosXY (posMat,halfWindow):
 
@@ -512,17 +648,25 @@ def computeSpeedFromPosXY (posMat,halfWindow):
 
     return speedMat
 
+#def postprocess_ethograms (ethoRaw):
                                                                                 
 
 def subplot_images (sMRecTh,rows,columns):
 
+    #plt.figure(1)                # the first figure
+    #plt.subplot(211)             # the first subplot in the first figure
+    #plt.matshow(np.reshape(sMRecTh[5,:],(80,80)), interpolation=None, aspect='auto');
+    #plt.subplot(212)             # the second subplot in the first figure
+    #plt.matshow(np.reshape(sMRecTh[6,:],(80,80)), interpolation=None, aspect='auto');
 
     fig=plt.figure(figsize=(8, 8))
-
+    #columns = 10
+    #rows = 4
     for i in range(1, columns*rows +1):
         img = np.reshape(sMRecTh[i-1,:],(80,80))
         fig.add_subplot(rows, columns, i)
         plt.imshow(img)
     plt.show()
 
+#subplot_images (sMRecTh)
     
