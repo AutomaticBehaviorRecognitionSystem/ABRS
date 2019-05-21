@@ -41,7 +41,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 
-cap = cv2.VideoCapture('Empty_Chrimson_dusted_1_2.avi');fb=4
+cap = cv2.VideoCapture('Empty_Chrimson_dusted_1_2.avi');fb=4 #insert path to the raw movie; see README for the format
 
 
 newSize = (400,400);
