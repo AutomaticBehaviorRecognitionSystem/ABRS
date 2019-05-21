@@ -1,6 +1,6 @@
 # ABRS
 
-Automatic Behavior Recognition System can annotate behaviors of freely moving flies from video. It extracts spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
+Automatic Behavior Recognition System can annotate behaviors of freely moving flies and potentially other animals from video. It extracts spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
 
 The most current version utilizes a small convolutional neural network directly from the video with simplified pre-processing. It can classify behavior in real-time. This version can be tested by cloning the ABRS an running real_time_ABRS. That's it. It will produce an ethogram (record of behavior) from a video. 
 
