@@ -1,3 +1,10 @@
+# Copyright (c) 2019 Primoz Ravbar UCSB
+# Licensed under BSD 2-Clause [see LICENSE for details]
+# Written by Primoz Ravbar
+
+#This file contains functions used with ABRS
+
+
 import numpy as np
 import scipy
 from scipy import ndimage
