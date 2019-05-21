@@ -1,4 +1,8 @@
-# ABRS
+Automatic Behavior Recognition System (ABRS)
+
+Copyright (c) 2019 Primoz Ravbar UCSB
+Licensed under BSD 2-Clause [see LICENSE for details]
+Written by Primoz Ravbar
 
 Automatic Behavior Recognition System can annotate behaviors of freely moving flies and potentially other animals from video. It extracts spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
 
