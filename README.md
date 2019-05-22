@@ -14,7 +14,7 @@ The pre-processing of video is crucial. It extracts features from raw video fram
   2) Difference between two frames; and
   3) Spectral features extracted from a wider time window (typically .5 sec).
 
-The ConvNet training code will be uploaded shortly.
+ConvNet training is implemented by ConvNet_training.ipynb 
 
 The thouroughly tested older version is described below:
 
