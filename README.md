@@ -6,7 +6,7 @@ Written by Primoz Ravbar
 
 Automatic Behavior Recognition System can annotate behaviors of freely moving flies and potentially other animals from video. It extracts spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
 
-The most current version utilizes a small convolutional neural network directly from the video with simplified pre-processing. It can classify behavior in real-time. This version can be tested by cloning the ABRS and running real_time_ABRS. The latest model (the trained convolutional network) used is: modelConv2ABRS_3C  That's it. It will produce an ethogram (record of behavior) from a video. 
+The most current real-time version utilizes a small convolutional neural network directly from the video with simplified pre-processing. It can classify behavior in real-time. This version can be tested by cloning the ABRS and running real_time_ABRS. The latest model (the trained convolutional network) used is: modelConv2ABRS_3C  That's it. It will produce an ethogram (record of behavior) from a video. 
 
 The pre-processing of video is crucial. It extracts features from raw video frames in three time-scales:
 
@@ -14,7 +14,9 @@ The pre-processing of video is crucial. It extracts features from raw video fram
   2) Difference between two frames; and
   3) Spectral features extracted from a wider time window (typically .5 sec).
 
-ConvNet training is implemented by ConvNet_training.ipynb 
+ConvNet training is implemented by ConvNet_training.ipynb The trained CNN graph and weights can be used for the real-time and batch implementations.
+
+The batch implementation (to run multiple movies and produce ethograms) will be uploaded shortly.
 
 The thouroughly tested older version is described below:
 
