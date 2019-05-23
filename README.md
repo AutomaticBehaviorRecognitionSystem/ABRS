@@ -14,7 +14,7 @@ The pre-processing of video is crucial. It extracts features from raw video fram
   2) Difference between two frames; and
   3) Spectral features extracted from a wider time window (typically .5 sec).
 
-ConvNet training is implemented by ConvNet_training.ipynb The trained CNN graph and weights can be used for the real-time and batch implementations. The training data consists of ST-images (3C) and labels.It will be uploaded shorty to Training folder. 
+ConvNet training is implemented by ConvNet_training.ipynb The trained CNN graph and weights can be used for the real-time and batch implementations. The training data consists of ST-images (3C) and labels.It will be uploaded shorty to Training Data folder. 
 
 The batch implementation (to run multiple movies and produce ethograms) is batch_3C_to_etho.ipynb .
 
