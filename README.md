@@ -6,9 +6,9 @@ Written by Primoz Ravbar
 
 Automatic Behavior Recognition System can annotate behaviors of freely moving flies and potentially other animals from video. It extracts spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
 
-The most current real-time version utilizes a small convolutional neural network directly from the video with simplified pre-processing. It can classify behavior in real-time. This version can be tested by cloning the ABRS and running real_time_ABRS. The latest model (the trained convolutional network) used is: modelConv2ABRS_3C  That's it. It will produce an ethogram (record of behavior) from a video. 
+The most current real-time version utilizes a small convolutional neural network directly from the video with simplified pre-processing. It can classify behavior in real-time. This version can be tested by cloning the ABRS and running real_time_ABRS. A sample model (the trained convolutional network) used is: modelConv2ABRS_3C Other, better models, can be found in the "Model" folder. That's it. It will produce an ethogram (record of behavior) from a video. 
 
-The pre-processing of video is crucial. It extracts features from raw video frames in three time-scales:
+The pre-processing (production of ST-images) of video is crucial. It extracts features from raw video frames in three time-scales:
 
   1) Raw frame;
   2) Difference between two frames; and
@@ -16,7 +16,9 @@ The pre-processing of video is crucial. It extracts features from raw video fram
 
 ConvNet training is implemented by ConvNet_training.ipynb The trained CNN graph and weights can be used for the real-time and batch implementations. The training data consists of ST-images (3C) and labels.It will be uploaded shorty to Training Data folder. 
 
-The batch implementation (to run multiple movies and produce ethograms) is batch_3C_to_etho.ipynb .
+The batch implementation (to read ST-images from multiple movies and produce ethograms) is batch_3C_to_etho.ipynb . This batch takes ST-images as the input and outputs ethograms.
+
+A more direct batch implemenation (to produce ST-images and predict behaviors directly from the movies) is: video_to_ST3C_image_batch.ipynb
 
 The thouroughly tested older version is described below:
 
