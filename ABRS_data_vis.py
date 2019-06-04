@@ -1,4 +1,8 @@
-#ABRS_data_vis
+# Copyright (c) 2019 Primoz Ravbar UCSB
+# Licensed under BSD 2-Clause [see LICENSE for details]
+# Written by Primoz Ravbar
+
+#This file contains functions used with ABRS
 
 import numpy as np
 import scipy
@@ -12,10 +16,6 @@ from ABRS_modules import etho2ethoAP
 
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Rectangle
-
-#idxLabelSelected = idxLabel[:,startPlot:stopPlot]
-#colorByVect = idxLabelSelected;
-#D=X_embedded;
 
 def create_colorMat(colorByVect):
     
@@ -43,40 +43,12 @@ def create_colorMat(colorByVect):
     
     return cM, cM_AP
 
-#cM = create_colorMat(colorByVect)
-
-#cmap = ListedColormap([[0, 0.0, 0.0],[0.9, 0.6, 0.3], [0.4, 0, 0.9], [0, 0.4, 0.0], [0, 0.9, 0.0], [0, 0.6, 1.0], [0, 0.0, 0.0]])
 cmapG = ListedColormap([[0, 0.0, 0.0],[0.9, 0.6, 0.3], [0.4, 0, 0.9], [0, 0.4, 0.0], [0, 0.9, 0.0], [0, 0.6, 1.0], [0, 0.0, 0.0],[1, 1.0, 1.0]])
-
-#cmapAP = ListedColormap([[0, 0.0, 0.0],[1, 0.0, 0.0], [0.0, 0, 1.0], [0, 0.0, 0.0], [1, 1.0, 1.0]])
 cmapAP = ListedColormap([[0, 0.0, 0.0],[1, 0.0, 0.0], [0.0, 0, 1.0], [0, 0.0, 0.0]])
 
 cMatG = [[0, 0.0, 0.0],[0.9, 0.6, 0.3], [0.4, 0, 0.9], [0, 0.4, 0.0], [0, 0.9, 0.0], [0, 0.6, 1.0], [0, 0.0, 0.0],[1, 1.0, 1.0]]
 cMatAP = [[0, 0.0, 0.0],[1, 0.0, 0.0], [0.0, 0, 1.0], [0, 0.0, 0.0]]
 
-#plt.scatter(X_embedded[:,0], X_embedded[:,1], c=cM, alpha=1);plt.show()
-#plt.matshow(idxLabel, interpolation=None, alpha=1, aspect='auto',cmap=cmap);plt.show()
-
-
-def subplot_images (sMRecTh,rows,columns):
-
-    #plt.figure(1)                # the first figure
-    #plt.subplot(211)             # the first subplot in the first figure
-    #plt.matshow(np.reshape(sMRecTh[5,:],(80,80)), interpolation=None, aspect='auto');
-    #plt.subplot(212)             # the second subplot in the first figure
-    #plt.matshow(np.reshape(sMRecTh[6,:],(80,80)), interpolation=None, aspect='auto');
-
-    fig=plt.figure(figsize=(8, 8))
-    #columns = 10
-    #rows = 4
-    for i in range(1, columns*rows +1):
-        #img = np.reshape(sMRecTh[i-1,:,:,:],((0,80,80,3)))
-        fig.add_subplot(rows, columns, i)
-        #plt.imshow(img)
-        plt.imshow(recIm3C[i,:,:,:]/255)
-    plt.show()
-
-#subplot_images (sMRecTh)
 
 
 def plot_data_with_stats (rawData,means,stds,numbOfBoxes = 1):
@@ -106,7 +78,7 @@ def plot_data_with_stats (rawData,means,stds,numbOfBoxes = 1):
 
         plt.plot([b+1 - 0.45 , b+1 + 0.25],[means[0,b]/30 , means[0,b]/30],c='r')
 
-        plt.scatter(xAxis[0,0:numbNonZero]+b,rawData[0:numbNonZero,b]/30,s=5,c=colList[colIndex],alpha=0.25);#plt.axis([20, 45, 10, 35]);
+        plt.scatter(xAxis[0,0:numbNonZero]+b,rawData[0:numbNonZero,b]/30,s=5,c=colList[colIndex],alpha=0.25)
 
         colIndex = colIndex + 1
         if colIndex > 2: colIndex = 0    
