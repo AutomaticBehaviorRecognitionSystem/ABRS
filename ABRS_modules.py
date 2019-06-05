@@ -560,6 +560,56 @@ def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
     return featureMat, posMat, maxMovementMat
 
+
+def balance_labels2d(y,X,limitCol):
+
+    shY = np.shape(y)
+    shX = np.shape(X)
+
+    yBal = np.zeros((1,1))
+    yNew = np.zeros((1,1))
+
+    XIm = np.zeros((1,shX[1],shX[2],shX[3]))
+    XBal = np.zeros((shX[0],shX[1],shX[2],shX[3]))
+
+    '''
+    limitCol = np.zeros((10,1))
+    limitCol[0]=2;
+    limitCol[1]=shY[0]/10;
+    limitCol[2]=shY[0]/10;
+    limitCol[3]=shY[0]/10;
+    limitCol[4]=shY[0]/10;
+    limitCol[5]=shY[0]*100;
+    limitCol[6]=shY[0]/70;
+    limitCol[7]=2;
+    '''
+
+    sumCol = np.zeros((10,1))
+
+    ind=0;
+
+    for i in range(0,shY[0]):
+
+        behInd = int(y[i,0])
+        sumCol[behInd]=sumCol[behInd]+1
+        
+
+        if sumCol[behInd] < limitCol[behInd]:
+            
+            ind=ind+1
+
+            yNew[0,0] = behInd;
+            XIm = X[i,:,:,:]
+
+            yBal = np.vstack((yBal,yNew))
+            XBal[ind,:,:,:] = XIm
+
+
+    yBal = yBal[1:ind,:]        
+    XBal = XBal[1:ind,:,:,:]     
+            
+    return  yBal,XBal  
+
 def removeZeroLabelsFromTrainingData (label,data):
 
 
