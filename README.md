@@ -4,7 +4,7 @@ Copyright (c) 2019 Primoz Ravbar UCSB
 Licensed under BSD 2-Clause [see LICENSE for details]
 Written by Primoz Ravbar
 
-Automatic Behavior Recognition System can annotate behaviors of freely moving flies and potentially other animals from video. It extracts spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
+Automatic Behavior Recognition System can annotate behaviors of freely moving flies and possibly other animals from video. It does NOT require alignment of frames, segmentation, anatomical information nor pose estimation. It can reliably recognize behavior in highly variable backgrounds, animal orientations, positions, light levels, movie qualities and other conditions. It does that by extracting spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
 
 The most current real-time version utilizes a small convolutional neural network directly from the video with simplified pre-processing. It can classify behavior in real-time. This version can be tested by cloning the ABRS and running real_time_ABRS. A sample model (the trained convolutional network) used is: modelConv2ABRS_3C Other, better models, can be found in the "Model" folder. That's it. It will produce an ethogram (record of behavior) from a video. 
 
@@ -20,10 +20,11 @@ ConvNet training is implemented by ConvNet_training.ipynb The trained CNN graph 
 
 The batch implementation (to read ST-images from multiple movies and produce ethograms) is batch_3C_to_etho.ipynb . This batch takes ST-images as the input and outputs ethograms.
 
-A more direct batch implemenation (to produce ST-images and predict behaviors directly from the movies) is: video_to_ST3C_image_batch.ipynb
+A more direct batch implementation (to produce ST-images and predict behaviors directly from the movies) is: video_to_ST3C_image_batch.ipynb
 
-The thouroughly tested older version is described below:
+The thoroughly tested older version is described below:
 
 The extraction of the features is implemented in two steps: first, run video_to_ST_image_batch to produce "ST-images" (ST-images capture "shapes of movements" in a defined time-window), second, run ST_image_to_ST_feature_batch to reduce the dimensionality of the ST-images (to 30 spatio-temporal features - down from 80x80 = 6400 dimensions). Here the 30 dimensional spatio-temporal features ("STF") are stored in Data_demo/ST_features.
 
 The STF files contain numpy matrices of the 30 spatio-temporal features calculated for every frame of the raw movies. They also contain max change of light intensity in the ST-image time-window and the total body displacement in the same window ("speed"). These features can be used in supervised or unsupervised ML steps. Here we provide an implementation based on LDA (supervised learning). The human labels are also provided.   
+
