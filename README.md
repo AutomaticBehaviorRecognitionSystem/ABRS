@@ -14,7 +14,7 @@ The pre-processing (production of ST-images) of video is crucial. It extracts fe
   2) Difference between two frames; and
   3) Spectral features extracted from a wider time window (typically .5 sec).
   
-See ST_images_samle_anterior.png for an example of 3-channel spatio-temporal images (blue - raw frame; yellow/green - frame-to-frame difference; red - spectral features from broader time window). The fly in these images is involved in "leg rubbing" [1] and "head cleaning" behaviors [2]. The behavioral labels (classes) [1] and [2] above the images are automatically created by ABRS. 
+See ST_images_samle_anterior.png for an example of 3-channel spatio-temporal images (blue - raw frame; yellow/green - frame-to-frame difference; red - spectral features from broader time window). The fly in these images is involved in "leg rubbing" [1] and "head cleaning" behaviors [2]. The behavioral labels (classes) [1] and [2] above the images are automatically created by ABRS. Another example, SampleImagesWingCleanin.png, is showing several different flies, in various backgrounds, positions, orientations and light levels, all engaged in the same behavior (wing cleaning). Again, these highly variable images were classified as "wing cleaning" by the ABRS, illustrating good generalization.
 
 ConvNet training is implemented by ConvNet_training.ipynb The trained CNN graph and weights can be used for the real-time and batch implementations. The training data consists of ST-images (3C) and labels.It will be uploaded shorty to Training Data folder. 
 
