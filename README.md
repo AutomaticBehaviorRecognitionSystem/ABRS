@@ -24,6 +24,8 @@ A more direct batch implementation (to produce ST-images and predict behaviors d
 
 The thoroughly tested older version is described below:
 
+Also see the paper: Ravbar, Primoz, Kristin Branson, and Julie H. Simpson. "An automatic behavior recognition system classifies animal behaviors using movements and their temporal context." Journal of Neuroscience Methods (2019): 108352. (https://www.sciencedirect.com/science/article/pii/S0165027019302092)
+
 The extraction of the features is implemented in two steps: first, run video_to_ST_image_batch to produce "ST-images" (ST-images capture "shapes of movements" in a defined time-window), second, run ST_image_to_ST_feature_batch to reduce the dimensionality of the ST-images (to 30 spatio-temporal features - down from 80x80 = 6400 dimensions). Here the 30 dimensional spatio-temporal features ("STF") are stored in Data_demo/ST_features.
 
 The STF files contain numpy matrices of the 30 spatio-temporal features calculated for every frame of the raw movies. They also contain max change of light intensity in the ST-image time-window and the total body displacement in the same window ("speed"). These features can be used in supervised or unsupervised ML steps. Here we provide an implementation based on LDA (supervised learning). The human labels are also provided.   
