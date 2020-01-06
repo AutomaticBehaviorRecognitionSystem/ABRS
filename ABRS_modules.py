@@ -3,7 +3,7 @@
 # Written by Primoz Ravbar
 
 #This file contains functions used with ABRS
-
+#Last updated: 01/06/2020
 
 import numpy as np
 import scipy
@@ -36,7 +36,10 @@ def create_ST_image(cfrVectRec):
 
     sM = np.sum(np.absolute(MST), axis=0);
     
+
+
     I = np.reshape(sM,(80,80));
+
 	 
     return I, sM, MST;
 
@@ -45,6 +48,7 @@ def center_of_gravity(cfrVectRec):
     sh = np.shape(cfrVectRec);
 
     F=np.absolute(np.fft.fft(cfrVectRec,axis=0))
+
     
     av = np.zeros((1,sh[0]));
     av[0,:] = np.arange(1,sh[0]+1);
@@ -61,6 +65,7 @@ def center_of_gravity(cfrVectRec):
     return cG
 
 def center_of_gravity2(cfrVectRec):
+
 
     F=np.absolute(np.fft.fft(cfrVectRec,axis=0))
 
@@ -125,14 +130,17 @@ def center_of_gravity3(cfrVectRec):
 
 def create_3C_image (cfrVectRec):
 
+    winSize = np.shape(cfrVectRec)
 
-    cG=center_of_gravity(cfrVectRec);
+    cG=center_of_gravity(cfrVectRec)
 
     averageSubtFrameVecRec = subtract_average(cfrVectRec,0)
 
-    imRaw = np.reshape(cfrVectRec[1,:],(80,80))
+    imRaw = np.reshape(cfrVectRec[winSize[0]-1,:],(80,80))
 
-    imDiff = np.reshape(cfrVectRec[1,:]-cfrVectRec[0,:],(80,80));
+    #imDiff = np.reshape(averageSubtFrameVecRec[1,:]-averageSubtFrameVecRec[0,:],(80,80))
+    imDiff = np.reshape(cfrVectRec[winSize[0]-1,:]-cfrVectRec[winSize[0]-2,:],(80,80));
+    #imDiff = np.reshape(cfrVectRec[1,:]-cfrVectRec[0,:],(80,80));
     imDiffAbs = np.absolute(imDiff)
     maxImDiffAbs = np.max(np.max(imDiffAbs))
     imDiffCl = np.zeros((80,80))
@@ -143,7 +151,7 @@ def create_3C_image (cfrVectRec):
     imVar = np.reshape(totVar,(80,80))
     imVarNorm = imVar/np.max(np.max(imVar))
     imVarBin = np.zeros((80,80))
-    imVarBin[imVarNorm > 0.10] = 1; #######!!!!!!!!!!
+    imVarBin[imVarNorm > 0.10] = 1; #######!!!!!!!!!! Set signal threshold default = 0.10
                                 
     I = np.reshape(cG,(80,80))*imVarBin;
     I = np.nan_to_num(I);
@@ -171,7 +179,7 @@ def create_3C_image (cfrVectRec):
     
 
     rgbArray = np.zeros((80,80,3), 'uint8')
-    rgbArray[..., 0] = I_RS*255    
+    rgbArray[..., 0] = I_RS*255
     rgbArray[..., 1] = imDiffAbs*255
     rgbArray[..., 2] = imRaw*255
 
@@ -204,8 +212,7 @@ def subtract_average(frameVectRec,dim):
         
 
 def read_frames(startFrame, endFrame, file_name, newSize):
-
-    
+   
     cap = cv2.VideoCapture(file_name)
 
     print(file_name)
@@ -213,9 +220,13 @@ def read_frames(startFrame, endFrame, file_name, newSize):
     for i in range(startFrame, endFrame):
 
         cap.set(1,i);
-        ret, frame = cap.read() #
-       
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #convert frame to gray
+        ret, frame = cap.read() #get frame
+
+
+        if np.size(np.shape(frame)) != 0:            
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #
+        else:
+            gray = np.zeros((1024, 1024))
         
         rs = cv2.resize(gray,(newSize[0],newSize[1]));
         frameVect = rs.reshape(1,newSize[0]*newSize[1]);
@@ -248,8 +259,7 @@ def read_frames2(startFrame, endFrame, file_name, newSize):
     for i in range(startFrame, endFrame):
 
         cap.set(1,i);
-        ret, frame = cap.read() #
-
+        ret, frame = cap.read() #get frame
        
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #convert frame to gray
         
@@ -259,7 +269,37 @@ def read_frames2(startFrame, endFrame, file_name, newSize):
 
         frRec[i,:] = frameVectFloat
 
-    
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()    
+        
+    return frRec
+
+def read_frames3(startFrame, endFrame, cap, newSize):
+
+
+
+    for i in range(startFrame, endFrame):
+
+        cap.set(1,i);
+        ret, frame = cap.read() #get frame
+
+        if np.size(np.shape(frame)) != 0:            
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #
+        else:
+            gray = np.zeros((1024, 1024))
+        
+        rs = cv2.resize(gray,(newSize[0],newSize[1]));
+        frameVect = rs.reshape(1,newSize[0]*newSize[1]);
+        frameVectFloat = frameVect.astype(float);    
+
+        if i == startFrame:
+            frRec = frameVectFloat;
+        if i > startFrame:
+            frRec = np.vstack((frRec,frameVectFloat));
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -272,10 +312,17 @@ def read_frames2(startFrame, endFrame, file_name, newSize):
 
 def getting_frame_record(frRec, startWin, endWin, fb):
 
+
+
+    if fb>0:
+        sideSize = 200
+    if fb==0:
+        sideSize = 400
             
     for i in range(startWin,endWin):
 
-            frame = frRec[i,:];
+            frame = frRec[i,:]
+          
             gray = frame.reshape(400,400);
 
             if fb == 1:
@@ -290,9 +337,13 @@ def getting_frame_record(frRec, startWin, endWin, fb):
             if fb == 4:    
                 rf = gray[200:400,200:400];
 
+            if fb == 0:    
+                rf = gray    
+
+  
             rs = rf   
             
-            frameVect = rs.reshape(1,200*200);
+            frameVect = rs.reshape(1,np.shape(rs)[0]*np.shape(rs)[1])
             frameVectFloat = frameVect.astype(float)
 
  
@@ -309,8 +360,8 @@ def getting_frame_record(frRec, startWin, endWin, fb):
 
     indMaxDiff = np.argmax(frameDiffComm);
     
-    rowMaxDiff = np.floor(indMaxDiff/200);
-    colMaxDiff = indMaxDiff - (rowMaxDiff*200);
+    rowMaxDiff = np.floor(indMaxDiff/sideSize)
+    colMaxDiff = indMaxDiff - (rowMaxDiff*sideSize)
 
     rowMaxDiff = rowMaxDiff.astype(int);
     colMaxDiff = colMaxDiff.astype(int);
@@ -322,7 +373,7 @@ def getting_frame_record(frRec, startWin, endWin, fb):
 
     for i in range(0,(endWin-startWin)):
         
-           rs = frameVectFloatRec[i,:].reshape(200,200)
+           rs = frameVectFloatRec[i,:].reshape(sideSize,sideSize)
 
            bottomOvershot=0
            rightOvershot=0
@@ -331,16 +382,16 @@ def getting_frame_record(frRec, startWin, endWin, fb):
            if topEdge < 0:
                topEdge=0;
            bottomEdge = rowMaxDiff+40;
-           if bottomEdge > 200:
-               bottomOvershot = bottomEdge-200
-               bottomEdge=200;
+           if bottomEdge > sideSize:
+               bottomOvershot = bottomEdge-sideSize
+               bottomEdge=sideSize
            leftEdge = colMaxDiff-40;
            if leftEdge < 0:
                leftEdge=0;
            rightEdge = colMaxDiff+40;
-           if rightEdge > 200:
-               rightOvershot = rightEdge-200
-               rightEdge=200;
+           if rightEdge > sideSize:
+               rightOvershot = rightEdge-sideSize
+               rightEdge=sideSize
 
            cfr = rs[topEdge:bottomEdge,leftEdge:rightEdge];
            shapeCfr = cfr.shape; 
@@ -405,7 +456,11 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
             if fb == 4:    
                 rf = resizedFrame[200:400,200:400];
 
+            if fb == 0:    
+                rf = resizedFrame     
+
             rs = rf
+
             
             frameVect = rs.reshape(1,int(newSize[0]/2)*int(newSize[1]/2));
             frameVectFloat = frameVect.astype(float);
@@ -486,7 +541,6 @@ def find_movement_in_fb(rawFrRec, startWin, endWin, fb, newSize):
                 zoomInFrameVectRec = zoomInFrameVect;
             if i > 0:
                 zoomInFrameVectRec = np.vstack((zoomInFrameVectRec,zoomInFrameVect));
-                       
 
     return posDic, zoomInFrameVectRec
 
@@ -510,6 +564,16 @@ def smooth_2d (M, winSm):
     Msm = savgol_filter(M, window_length=winSm, polyorder=0);
     return Msm
 
+def etho_mat_2_etho_vect(ethoMatrix):
+
+    maxEtho = np.zeros((1,np.shape(ethoMatrix)[1]))
+    maxEtho[0,:] = np.argmax(ethoMatrix[0:np.shape(ethoMatrix)[0],:],axis=0)
+
+    ethoVect = maxEtho
+
+    return ethoVect
+
+
 def etho2ethoAP (idx):
 
     sh = np.shape(idx);
@@ -530,6 +594,8 @@ def etho2ethoAP (idx):
 
 def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
+
+
     fileList = sorted(os.listdir(dirPathFeatures));
 
     for fl in range(0, numbFiles, 1):
@@ -541,7 +607,7 @@ def create_LDA_training_dataset (dirPathFeatures,numbFiles):
 
         with open(featureMatDirPathFileName, "rb") as f:
              STF_30_posXY_dict = pickle.load(f);
-
+             #featureMatCurrent = pickle.load(f)
         featureMatCurrent = STF_30_posXY_dict["featureMat"];
         posMatCurrent = STF_30_posXY_dict["posMat"];
         maxMovementMatCurrent = STF_30_posXY_dict["maxMovementMat"];
@@ -559,56 +625,6 @@ def create_LDA_training_dataset (dirPathFeatures,numbFiles):
             maxMovementMat = np.hstack((maxMovementMat, maxMovementMatCurrent));
 
     return featureMat, posMat, maxMovementMat
-
-
-def balance_labels2d(y,X,limitCol):
-
-    shY = np.shape(y)
-    shX = np.shape(X)
-
-    yBal = np.zeros((1,1))
-    yNew = np.zeros((1,1))
-
-    XIm = np.zeros((1,shX[1],shX[2],shX[3]))
-    XBal = np.zeros((shX[0],shX[1],shX[2],shX[3]))
-
-    '''
-    limitCol = np.zeros((10,1))
-    limitCol[0]=2;
-    limitCol[1]=shY[0]/10;
-    limitCol[2]=shY[0]/10;
-    limitCol[3]=shY[0]/10;
-    limitCol[4]=shY[0]/10;
-    limitCol[5]=shY[0]*100;
-    limitCol[6]=shY[0]/70;
-    limitCol[7]=2;
-    '''
-
-    sumCol = np.zeros((10,1))
-
-    ind=0;
-
-    for i in range(0,shY[0]):
-
-        behInd = int(y[i,0])
-        sumCol[behInd]=sumCol[behInd]+1
-        
-
-        if sumCol[behInd] < limitCol[behInd]:
-            
-            ind=ind+1
-
-            yNew[0,0] = behInd;
-            XIm = X[i,:,:,:]
-
-            yBal = np.vstack((yBal,yNew))
-            XBal[ind,:,:,:] = XIm
-
-
-    yBal = yBal[1:ind,:]        
-    XBal = XBal[1:ind,:,:,:]     
-            
-    return  yBal,XBal  
 
 def removeZeroLabelsFromTrainingData (label,data):
 
@@ -649,4 +665,41 @@ def computeSpeedFromPosXY (posMat,halfWindow):
 
                                                                                 
 
+def balance_labels2d(y,X,limitCol):
+
+    shY = np.shape(y)
+    shX = np.shape(X)
+
+    yBal = np.zeros((1,1))
+    yNew = np.zeros((1,1))
+
+    XIm = np.zeros((1,shX[1],shX[2],shX[3]))
+    XBal = np.zeros((shX[0],shX[1],shX[2],shX[3]))
+
+
+    sumCol = np.zeros((10,1))
+
+    ind=0;
+
+    for i in range(0,shY[0]):
+
+        behInd = int(y[i,0])
+        sumCol[behInd]=sumCol[behInd]+1
+        
+
+        if sumCol[behInd] < limitCol[behInd]:
+            
+            ind=ind+1
+
+            yNew[0,0] = behInd;
+            XIm = X[i,:,:,:]
+
+            yBal = np.vstack((yBal,yNew))
+            XBal[ind,:,:,:] = XIm
+
+
+    yBal = yBal[1:ind,:]        
+    XBal = XBal[1:ind,:,:,:]     
+            
+    return  yBal,XBal    
     
