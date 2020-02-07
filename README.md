@@ -30,3 +30,6 @@ The extraction of the features is implemented in two steps: first, run video_to_
 
 The STF files contain numpy matrices of the 30 spatio-temporal features calculated for every frame of the raw movies. They also contain max change of light intensity in the ST-image time-window and the total body displacement in the same window ("speed"). These features can be used in supervised or unsupervised ML steps. Here we provide an implementation based on LDA (supervised learning). The human labels are also provided.   
 
+A prototype of GUI for making labels (labeling behaviors in a movie to create training data) is now uploaded: ABRS_label_maker_GUI.py
+This is a very rough version and needs a lot of work. Please see basic instructions in the discussion under Issues (https://github.com/AutomaticBehaviorRecognitionSystem/ABRS/issues/1) A more self-contained GUI version is coming soon!
+
