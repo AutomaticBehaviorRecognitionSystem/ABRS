@@ -6,6 +6,11 @@ Written by Primoz Ravbar
 
 Automatic Behavior Recognition System can annotate behaviors of freely moving flies and possibly other animals from video. It does NOT require alignment of frames, segmentation, anatomical information nor pose estimation. It can reliably recognize behavior in highly variable backgrounds, animal orientations, positions, light levels, movie qualities and other conditions. It does that by extracting spatio-temporal features from video. These spatio-temporal features can then be used with supervised machine learning (ML) to classify behaviors. 
 
+There is now a fully functional GUI for annotation of videos. The output of the GUI is in a format that can be immediately accessible for the training. See the ABRS_GUI_label_maker.pdf (in 'GUI_ABRS' folder) for very clear instructions! The GUI code is 'ABRSLabelMakerGUI.ipynb' (in 'GUI_ABRS' folder).
+
+The latest version of the ABRS (03/28/2022) uses residual neural network - ResNet-50 for predictions. The ST-images and labels produced by the 'ABRSLabelMakerGUI.ipynb' can be used for the ResNet-50 training by ResNet50_ABRS.ipynb. With each new training session, the model should improve, which will make further annotation by the GUI faster. 
+The ResNet-50 is too large to upload here so the initial labels can be made in the GUI by using any of the old models (in ‘Models’). Once the first labeled training set is created, a new ResNet-50 model should be trained with it. When the training is complete, start the GUI to annotate more data with the new model. 
+
 The most current real-time version utilizes a small convolutional neural network directly from the video with simplified pre-processing. It can classify behavior in real-time. This version can be tested by cloning the ABRS and running real_time_ABRS. A sample model (the trained convolutional network) used is: modelConv2ABRS_3C Other, better models, can be found in the "Model" folder. That's it. It will produce an ethogram (record of behavior) from a video. 
 
 The pre-processing (production of ST-images) of video is crucial. It extracts features from raw video frames in three time-scales:
